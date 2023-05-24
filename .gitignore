@@ -6,6 +6,7 @@
 .rust
 Cargo.lock
 /target
+/target_ra
 rust_sodium-sys/target
 systest/target
 
