@@ -32,7 +32,7 @@ use std::fs;
 use std::io::Cursor;
 use std::path::Path;
 
-const DOWNLOAD_BASE_URL: &'static str = "https://download.libsodium.org/libsodium/releases/old/";
+const DOWNLOAD_BASE_URL: &'static str = "https://cache.voysys.dev/";
 const FALLBACK_BASE_URL: &'static str = "https://s3.amazonaws.com/libsodium/";
 const VERSION: &'static str = "1.0.17";
 
