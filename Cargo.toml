@@ -13,8 +13,8 @@ version = "0.10.2"
 
 [dependencies]
 libc = "0.2"
-rand = "0.8"
-rust_sodium-sys = { git = "https://github.com/voysys/rust_sodium.git", tag = "voysys-2" }
+rand = "0.4"
+rust_sodium-sys = { git = "https://github.com/voysys/rust_sodium.git", tag = "voysys-3" }
 serde = "1"
 unwrap = "1"
 
