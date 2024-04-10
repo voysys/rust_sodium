@@ -7,8 +7,6 @@
 // specific language governing permissions and limitations relating to use of the SAFE Network
 // Software.
 
-#![forbid(warnings)]
-
 #[cfg(not(windows))]
 extern crate cc;
 #[cfg(not(target_env = "msvc"))]
@@ -33,7 +31,6 @@ use std::io::Cursor;
 use std::path::Path;
 
 const DOWNLOAD_BASE_URL: &'static str = "https://download.libsodium.org/libsodium/releases/old/";
-const FALLBACK_BASE_URL: &'static str = "https://s3.amazonaws.com/libsodium/";
 const VERSION: &'static str = "1.0.17";
 
 #[cfg(target_env = "msvc")] // libsodium-<VERSION>-msvc.zip
@@ -84,14 +81,12 @@ fn main() {
 /// Try to download the specified URL into a buffer which is returned.
 fn try_download(url: &str) -> Result<Cursor<Vec<u8>>, String> {
     // Send GET request
-    let response = request::get(url).map_err(|error| error.to_string())?;
+    let mut buffer = Vec::new();
+    let response = request::get(url, &mut buffer).map_err(|e| format!("{e:?}"))?;
 
-    // Only accept 2xx status codes
-    if response.status_code() < 200 || response.status_code() >= 300 {
+    if !response.status_code().is_success() {
         return Err(format!("Download error: HTTP {}", response.status_code()));
     }
-    let resp_body = response.body();
-    let buffer = resp_body.to_vec();
 
     // Check the SHA-256 hash of the downloaded file is as expected
     let hash = Sha256::digest(&buffer);
@@ -101,8 +96,7 @@ fn try_download(url: &str) -> Result<Cursor<Vec<u8>>, String> {
     Ok(Cursor::new(buffer))
 }
 
-/// Try to download the required file using the `DOWNLOAD_BASE_URL` and on failure from the
-/// `FALLBACK_BASE_URL`.
+/// Try to download the required file using the `DOWNLOAD_BASE_URL`
 fn download_compressed_file() -> Cursor<Vec<u8>> {
     let filename = if cfg!(target_env = "msvc") {
         format!("libsodium-{}-msvc.zip", VERSION)
@@ -113,17 +107,7 @@ fn download_compressed_file() -> Cursor<Vec<u8>> {
     };
 
     let url = format!("{}{}", DOWNLOAD_BASE_URL, filename);
-    if let Ok(compressed_file) = try_download(&url) {
-        return compressed_file;
-    }
-
-    let fallback_url = format!("{}{}", FALLBACK_BASE_URL, filename);
-    println!(
-        "cargo:warning=Failed to download libsodium from {}.  Falling back to MaidSafe mirror at {}",
-        url,
-        fallback_url
-    );
-    try_download(&fallback_url).unwrap_or_else(|error| panic!("\n\nDownload error: {}\n\n", error))
+    try_download(&url).unwrap_or_else(|error| panic!("\n\nDownload error: {}\n\n", error))
 }
 
 fn get_install_dir() -> String {

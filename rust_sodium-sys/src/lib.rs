@@ -13,7 +13,7 @@
     test(attr(forbid(warnings)))
 )]
 #![forbid(
-    exceeding_bitshifts,
+    arithmetic_overflow,
     mutable_transmutes,
     no_mangle_const_items,
     unknown_crate_types
@@ -23,7 +23,6 @@
     improper_ctypes,
     non_shorthand_field_patterns,
     overflowing_literals,
-    plugin_as_library,
     stable_features,
     unconditional_recursion,
     unknown_lints,
